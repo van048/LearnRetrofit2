@@ -16,6 +16,9 @@ import cn.ben.learnretrofit2.data.remote.SOService;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -47,9 +50,31 @@ public class MainActivity extends AppCompatActivity {
         RecyclerView.ItemDecoration itemDecoration = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
         mRecyclerView.addItemDecoration(itemDecoration);
 
-        loadAnswers();
+//        loadAnswers();
+        loadAnswersRxJava();
     }
 
+    private void loadAnswersRxJava() {
+        mService.getAnswersObservable().subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<SOAnswersResponse>() {
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onNext(SOAnswersResponse soAnswersResponse) {
+                        mAdapter.updateAnswers(soAnswersResponse.getItems());
+                    }
+                });
+    }
+
+    @SuppressWarnings("unused")
     private void loadAnswers() {
         mService.getAnswers().enqueue(new Callback<SOAnswersResponse>() {
             @Override
